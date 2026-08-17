@@ -1,7 +1,8 @@
 fastapi
 uvicorn
 qdrant-client
-sentence-transformers
+transformers
+torch
 pydantic
 tenacity
 datasets
