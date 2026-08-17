@@ -5,6 +5,8 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 from guardrails import Guardrails
 from retrieval import retrieve
 
+from sarvamai import SarvamAI
+
 INCEPTION_API_KEY = os.environ.get("INCEPTION_API_KEY", "")
 SARVAM_API_KEY = os.environ.get("SARVAM_API_KEY", "")
 
@@ -13,23 +15,24 @@ class PipelineError(Exception):
 
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=4))
 def call_stt(audio_file_path: str) -> str:
-    # Using Sarvam API for Indic STT
-    if not SARVAM_API_KEY:
-        # Fallback or stub if API key is not provided but user wants original
-        raise PipelineError("SARVAM_API_KEY is missing.")
+    if not SARVAM_API_KEY or SARVAM_API_KEY == "your_sarvam_api_key_here":
+        raise PipelineError("SARVAM_API_KEY is missing. Please add it to your .env file.")
         
-    url = "https://api.sarvam.ai/speech-to-text"
-    headers = {"api-subscription-key": SARVAM_API_KEY}
+    client = SarvamAI(api_subscription_key=SARVAM_API_KEY)
     
     with open(audio_file_path, "rb") as audio:
-        files = {"file": audio}
-        data = {"model": "saaras:v1"}
-        response = requests.post(url, headers=headers, files=files, data=data, timeout=5)
+        response = client.speech_to_text.transcribe(
+            file=audio,
+            model="saaras:v3",
+            mode="transcribe"
+        )
         
-    if response.status_code != 200:
-        raise PipelineError(f"STT API failed: {response.text}")
-        
-    return response.json().get("transcript", "")
+    # The Sarvam SDK response structure may vary, but assuming response.transcript or dict
+    if hasattr(response, 'transcript'):
+        return response.transcript
+    elif isinstance(response, dict) and "transcript" in response:
+        return response.get("transcript", "")
+    return str(response)
 
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=0.5, min=0.5, max=2))
 def call_llm(prompt: str) -> str:

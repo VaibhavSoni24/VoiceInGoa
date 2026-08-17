@@ -8,3 +8,4 @@ datasets
 requests
 python-dotenv
 python-multipart
+sarvamai
