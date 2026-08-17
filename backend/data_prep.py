@@ -1,26 +1,40 @@
 import os
 import json
-from datasets import load_dataset
+import pandas as pd
+import requests
 
 def download_and_prep_dataset(output_dir="data"):
-    print("Downloading MSMARCO-XI dataset...")
-    # Loading the validation split or train split. We'll use validation since it's typically smaller and contains good query-passage pairs.
-    # MSMARCO-XI has multiple languages. We focus on Hindi ("hi") or we can download all. We'll use english/hindi or default split.
-    # Actually MSMARCO-XI has lang='hi' etc.
-    # Let's load the english or hindi queries if available, or just the main corpus.
+    print("Downloading MSMARCO-XI dataset (Validation/Hindi)...")
+    os.makedirs(output_dir, exist_ok=True)
+    
+    parquet_url = "https://huggingface.co/datasets/ai4bharat/MSMARCO-XI/resolve/main/validation/hinval.parquet"
+    parquet_file = os.path.join(output_dir, "hinval.parquet")
+    corpus_file = os.path.join(output_dir, "corpus.json")
+    
     try:
-        # Load passages
-        print("Loading corpus...")
-        corpus = load_dataset("ai4bharat/MSMARCO-XI", "corpus", split="train")
+        # Download the parquet file directly using requests to bypass datasets/pyarrow errors
+        print(f"Fetching from {parquet_url}...")
+        response = requests.get(parquet_url, stream=True)
+        response.raise_for_status()
         
-        os.makedirs(output_dir, exist_ok=True)
-        corpus_file = os.path.join(output_dir, "corpus.json")
+        with open(parquet_file, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                f.write(chunk)
+                
+        print("Download complete. Reading with fastparquet...")
+        # Read the parquet file
+        df = pd.read_parquet(parquet_file, engine='fastparquet')
         
-        print(f"Loaded {len(corpus)} passages. Saving to {corpus_file}...")
+        print(f"Loaded {len(df)} passages. Saving to {corpus_file}...")
         
         # Save corpus to JSONL for easier processing
         with open(corpus_file, "w", encoding="utf-8") as f:
-            for item in corpus:
+            for _, row in df.iterrows():
+                # MS MARCO-XI parquet schema: _id, text, etc.
+                item = {
+                    "_id": str(row.get("_id", row.name)),
+                    "text": str(row.get("text", "")),
+                }
                 f.write(json.dumps(item, ensure_ascii=False) + "\n")
                 
         print("Dataset preparation complete.")
