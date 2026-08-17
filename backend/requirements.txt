@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+qdrant-client
+sentence-transformers
+pydantic
+tenacity
+datasets
+requests
+python-dotenv
+python-multipart
