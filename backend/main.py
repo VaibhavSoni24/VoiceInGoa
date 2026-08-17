@@ -3,11 +3,12 @@ import time
 import tempfile
 from fastapi import FastAPI, File, UploadFile, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
-from pipeline import call_stt, run_rag_pipeline
 
-# Load environment variables early
+# Load environment variables early (MUST be before importing pipeline)
 from dotenv import load_dotenv
 load_dotenv()
+
+from pipeline import call_stt, run_rag_pipeline
 
 app = FastAPI(title="VoiceInGoa API", description="Sub-200ms Voice-enabled RAG Pipeline")
 
@@ -27,7 +28,7 @@ def read_root():
 async def ask_voice(file: UploadFile = File(...)):
     # 1. Save uploaded audio temporarily
     start_time = time.time()
-    temp_audio = tempfile.NamedTemporaryFile(delete=False, suffix=".webm")
+    temp_audio = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
     try:
         content = await file.read()
         temp_audio.write(content)

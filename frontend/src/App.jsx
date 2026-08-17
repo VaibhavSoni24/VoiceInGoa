@@ -3,6 +3,40 @@ import { Mic, MicOff, Play, Send, CheckCircle2, AlertCircle, Loader2 } from 'luc
 import { startTour } from './tour';
 import './index.css';
 
+// WAV Encoder Utilities
+function writeString(view, offset, string) {
+  for (let i = 0; i < string.length; i++) {
+    view.setUint8(offset + i, string.charCodeAt(i));
+  }
+}
+
+function encodeWAV(samples, sampleRate, numChannels) {
+  const buffer = new ArrayBuffer(44 + samples.length * 2);
+  const view = new DataView(buffer);
+  
+  writeString(view, 0, 'RIFF');
+  view.setUint32(4, 36 + samples.length * 2, true);
+  writeString(view, 8, 'WAVE');
+  writeString(view, 12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true); // PCM format
+  view.setUint16(22, numChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * numChannels * 2, true);
+  view.setUint16(32, numChannels * 2, true);
+  view.setUint16(34, 16, true); // 16-bit
+  writeString(view, 36, 'data');
+  view.setUint32(40, samples.length * 2, true);
+  
+  let offset = 44;
+  for (let i = 0; i < samples.length; i++, offset += 2) {
+    let s = Math.max(-1, Math.min(1, samples[i]));
+    view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+  }
+  
+  return new Blob([view], { type: 'audio/wav' });
+}
+
 function App() {
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -58,14 +92,32 @@ function App() {
   };
 
   const handleStopRecordingComplete = async () => {
-    const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
     setIsProcessing(true);
     
-    // Simulate STT and RAG Pipeline via our backend
-    const formData = new FormData();
-    formData.append('file', audioBlob, 'recording.webm');
-    
     try {
+      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+      const arrayBuffer = await audioBlob.arrayBuffer();
+      
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+      
+      let pcmData;
+      if (audioBuffer.numberOfChannels === 2) {
+        const left = audioBuffer.getChannelData(0);
+        const right = audioBuffer.getChannelData(1);
+        pcmData = new Float32Array(left.length + right.length);
+        for (let i = 0; i < left.length; i++) {
+          pcmData[i * 2] = left[i];
+          pcmData[i * 2 + 1] = right[i];
+        }
+      } else {
+        pcmData = audioBuffer.getChannelData(0);
+      }
+      
+      const wavBlob = encodeWAV(pcmData, audioBuffer.sampleRate, audioBuffer.numberOfChannels);
+      
+      const formData = new FormData();
+      formData.append('file', wavBlob, 'recording.wav');
       // Assuming backend is running on localhost:8000
       const response = await fetch('http://localhost:8000/api/ask-voice', {
         method: 'POST',

@@ -7,6 +7,9 @@ from retrieval import retrieve
 
 from sarvamai import SarvamAI
 
+from dotenv import load_dotenv
+load_dotenv()
+
 INCEPTION_API_KEY = os.environ.get("INCEPTION_API_KEY", "")
 SARVAM_API_KEY = os.environ.get("SARVAM_API_KEY", "")
 
