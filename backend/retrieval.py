@@ -90,16 +90,16 @@ def retrieve(query: str, top_k=5):
     # E5 models prefix
     query_vector = get_embedding("query: " + query)
     
-    search_result = client.search(
+    search_result = client.query_points(
         collection_name=COLLECTION_NAME,
-        query_vector=query_vector,
+        query=query_vector,
         limit=top_k
     )
     
     retrieval_ms = int((time.time() - start_time) * 1000)
     
     results = []
-    for hit in search_result:
+    for hit in search_result.points:
         results.append({
             "score": hit.score,
             "text": hit.payload["text"],
