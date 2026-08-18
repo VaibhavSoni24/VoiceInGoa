@@ -39,6 +39,6 @@ The system refuses to answer when retrieval confidence falls below 0.75, filters
 ## Links
 *   **Live Demo**: [VoiceInGoa](https://voiceingoa.vercel.app/)
 
-> **Note on Deployment:** Due to the high memory requirements of running `transformers` and `PyTorch` alongside Qdrant (~1GB RAM), standard free-tier cloud containers crash with OOM errors. For this hackathon demo, the backend runs locally on a dedicated machine and is exposed securely via LocalTunnel.
+> **Note on Deployment:** [Deployment details to be updated]
 
 #RAGInGoa

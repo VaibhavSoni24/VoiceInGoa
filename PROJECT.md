@@ -227,7 +227,7 @@ STT/TTS: Sarvam AI · Embeddings: multilingual-e5-small · Vector DB: Qdrant · 
 - Team/process video: [To be added by team]
 - Demo video: [To be added by team]
 
-> **Note on Deployment:** Standard free-tier cloud containers crash with OOM errors due to the memory requirements of running `transformers` and `PyTorch` alongside Qdrant (~1GB RAM). For this hackathon demo, the backend runs locally on a dedicated machine and is securely tunneled to the Vercel frontend via LocalTunnel.
+> **Note on Deployment:** [Deployment details to be updated]
 
 #RAGInGoa
 

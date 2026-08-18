@@ -51,10 +51,6 @@ def download_and_prep_dataset(output_dir="data"):
                     }
                     f.write(json.dumps(item, ensure_ascii=False) + "\n")
                     count += 1
-                    if count >= 10000:
-                        break
-                if count >= 10000:
-                    break
                 
         print(f"Dataset preparation complete. Wrote {count} passages + golden records.")
         
