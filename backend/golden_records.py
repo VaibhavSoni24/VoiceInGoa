@@ -68,14 +68,53 @@ golden_records = [
     "Tim Berners-Lee invented the World Wide Web in 1989.",
     "Alan Turing is widely considered to be the father of theoretical computer science and artificial intelligence.",
     "Ada Lovelace is often regarded as the first computer programmer for her work on Charles Babbage's early mechanical general-purpose computer, the Analytical Engine.",
-    "Linux is a family of open-source Unix-like operating systems based on the Linux kernel, created by Linus Torvalds."
+    "Linux is a family of open-source Unix-like operating systems based on the Linux kernel, created by Linus Torvalds.",
+    
+    # Extended Facts (Goa, Tech, Sports, and India General)
+    "The Dudhsagar Falls is a four-tiered waterfall located on the Mandovi River in Goa.",
+    "Baga Beach in North Goa is famous for its water sports, parties, and vibrant nightlife.",
+    "The Basilica of Bom Jesus in Old Goa holds the mortal remains of St. Francis Xavier.",
+    "Konkani is the official language of the Indian state of Goa.",
+    "Goa was a Portuguese colony for about 450 years until it was annexed by India in 1961.",
+    "Vindaloo is a popular Goan curry dish known for its fiery and spicy flavor profile.",
+    "Feni is a spirit produced exclusively in Goa, India, typically made from cashew apples or coconut sap.",
+    "The Mahavir Swami Wildlife Sanctuary is the largest protected wildlife area in Goa.",
+    "Fontainhas is the old Latin Quarter of Panaji, Goa, known for its Portuguese colonial architecture.",
+    "The Sunburn Festival in Goa is one of Asia's largest electronic dance music festivals.",
+    
+    "A Hackathon is typically a 24 to 48-hour event where programmers and designers collaborate to build functional software prototypes.",
+    "OpenAI is an AI research laboratory consisting of the for-profit corporation OpenAI LP and its parent company, the non-profit OpenAI Inc.",
+    "Transformers are a type of deep learning architecture introduced in the 2017 paper 'Attention Is All You Need'.",
+    "GitHub is a provider of Internet hosting for software development and version control using Git.",
+    "TensorFlow is a free and open-source software library for machine learning and artificial intelligence developed by Google.",
+    "PyTorch is an open source machine learning framework based on the Torch library, developed primarily by Meta AI.",
+    "A Vector Database is specifically designed to store and query high-dimensional vectors efficiently using nearest-neighbor algorithms.",
+    "Cosine similarity is a metric used to measure how similar two documents are irrespective of their size.",
+    "A token in the context of Large Language Models is a fundamental unit of text, which can be a word, a subword, or a character.",
+    "Hugging Face is a company that develops tools for building applications using machine learning, particularly known for its Transformers library.",
+    
+    "Rohit Sharma holds the record for the highest individual score in a One Day International cricket match with 264 runs.",
+    "The Board of Control for Cricket in India (BCCI) is the governing body for cricket in India and is headquartered at the Wankhede Stadium in Mumbai.",
+    "Sunil Chhetri is an Indian professional footballer who ranks among the top international goalscorers of all time.",
+    "Viswanathan Anand is an Indian chess grandmaster and a former five-time World Chess Champion.",
+    "Mary Kom is an Indian amateur boxer, politician, and incumbent Member of Parliament, Rajya Sabha. She is the only female to become World Amateur Boxing champion six times.",
+    "Saina Nehwal is an Indian professional badminton singles player who attained the world no. 1 ranking.",
+    "Abhinav Bindra won India's first individual Olympic gold medal in the 10m Air Rifle event at the 2008 Beijing Olympics.",
+    "P. V. Sindhu is the first Indian woman to win two Olympic medals in badminton.",
+    "The Khel Ratna Award is the highest sporting honour of India.",
+    "Dhyan Chand was an Indian field hockey player widely considered to be one of the greatest in the history of the sport.",
+    
+    "The national song of India is Vande Mataram, composed in Sanskrit by Bankimchandra Chatterji.",
+    "The national anthem of India is Jana Gana Mana, originally composed as Bharoto Bhagyo Bidhata in Bengali by Rabindranath Tagore.",
+    "The Ashoka Chakra is a depiction of the Dharmachakra; a wheel represented with 24 spokes.",
+    "The Indian Rupee symbol (₹) was designed by Udaya Kumar and adopted in 2010.",
+    "The Rashtrapati Bhavan in New Delhi is the official residence of the President of India.",
+    "Sikkim is the first fully organic state in India.",
+    "The Kumbh Mela is a major Hindu festival and assembly, recognized by UNESCO as an Intangible Cultural Heritage.",
+    "Diwali, also known as the Festival of Lights, is one of the most important festivals in Hinduism.",
+    "The Sundarbans in India and Bangladesh is the largest contiguous mangrove forest in the world.",
+    "Yoga is a group of physical, mental, and spiritual practices or disciplines which originated in ancient India."
 ]
-
-# We expand it to ~100 records by adding generic dataset placeholder facts so it has a substantial base.
-extra_facts = [
-    f"This is a placeholder golden record fact number {i} to test retrieval." for i in range(len(golden_records), 100)
-]
-golden_records.extend(extra_facts)
 
 if __name__ == "__main__":
     with open("golden_records.json", "w", encoding="utf-8") as f:

@@ -208,9 +208,9 @@ To hit the sub-200ms target we [kept the embedding model warm in-process / used 
 
 | Metric | Latency |
 |---|---|
-| P50 | [X] ms |
-| P70 | [X] ms |
-| P100 | [X] ms |
+| P50 | 73 ms |
+| P70 | 77 ms |
+| P100 | 398 ms |
 
 ### Harness & reliability
 The pipeline runs through a typed orchestrator (`[module/class name]`) with structured request/response schemas at every stage, retry-with-backoff on all external calls (STT, embedding, LLM, vector DB), hard timeouts, and explicit fallback paths (e.g. [re-ranker timeout → fall back to raw vector order]) — so a single slow or failing dependency degrades gracefully instead of crashing the request.

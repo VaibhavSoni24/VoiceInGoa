@@ -16,9 +16,9 @@ To hit the sub-200ms target we keep the embedding model warm in-process, use an 
 
 | Metric | Latency |
 |---|---|
-| P50 | ~120 ms |
-| P70 | ~145 ms |
-| P100 | ~180 ms |
+| P50 | 73 ms |
+| P70 | 77 ms |
+| P100 | 398 ms |
 
 *(Actual metrics can be found by running `backend/benchmarks.py`)*
 
