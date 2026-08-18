@@ -36,4 +36,7 @@ The system refuses to answer when retrieval confidence falls below 0.75, filters
 *   **Backend**: FastAPI
 *   **Frontend**: React + Tailwind + ReactBits + Driver.js
 
+## Links
+*   **Live Demo**: [VoiceInGoa](https://voiceingoa.vercel.app/)
+
 #RAGInGoa

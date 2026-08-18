@@ -223,7 +223,7 @@ STT/TTS: Sarvam AI · Embeddings: multilingual-e5-small · Vector DB: Qdrant · 
 
 ### Links
 - GitHub: https://github.com/VaibhavSoni24/VoiceInGoa
-- Live demo: [Will update post-deployment]
+- Live demo: [VoiceInGoa](https://voiceingoa.vercel.app/)
 - Team/process video: [To be added by team]
 - Demo video: [To be added by team]
 
