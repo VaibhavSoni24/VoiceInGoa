@@ -130,10 +130,31 @@ function App() {
       
       const data = await response.json();
       
-      if (data.status === 'success') {
-        setTranscript(data.transcript);
-        setAnswer(data.answer);
-        setMetrics(data.metrics);
+      if (data.status === 'answered' || data.status === 'answered_partial') {
+        setTranscript(data.transcribed_query);
+        setAnswer({
+          content: data.answer,
+          citations: data.citations?.map(c => ({ id: c.passage_id, text: c.snippet })) || []
+        });
+        setMetrics({
+          stt_ms: data.latency_ms?.stt || 0,
+          retrieval_ms: data.latency_ms?.retrieval || 0,
+          generation_ms: data.latency_ms?.generation || 0,
+          total_rag_ms: data.latency_ms?.total || 0
+        });
+      } else if (data.status === 'refused') {
+        setTranscript(data.transcribed_query);
+        setAnswer({
+          refused: true,
+          content: data.message || 'Request refused.',
+          reason: data.guardrail_triggered || 'Unknown'
+        });
+        setMetrics({
+          stt_ms: data.latency_ms?.stt || 0,
+          retrieval_ms: data.latency_ms?.retrieval || 0,
+          generation_ms: data.latency_ms?.generation || 0,
+          total_rag_ms: data.latency_ms?.total || 0
+        });
       } else {
         throw new Error(data.message || 'Unknown error occurred');
       }
