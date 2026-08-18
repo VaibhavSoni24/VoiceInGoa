@@ -1,0 +1,41 @@
+## Analysis of VoiceInGoa (VaibhavSoni24/VoiceInGoa)
+
+I pulled the README, `PROJECT.md`, `REPORT.md`, and `HowToRun.md`. Here's where the project actually stands versus what it claims — including one discrepancy you should fix before submitting.
+
+### What's genuinely solid
+
+- **All 9 test cases from the guide were actually run and documented in `REPORT.md`** — not just claimed, with real inputs, real outputs, real confidence scores (e.g. 0.887 on the happy path, 0.852 on the Hinglish code-switch test). This is exactly the kind of evidence judges want to see.
+- **Guardrails are demonstrably working, not decorative**: the off-topic test (weather query) triggered `low_retrieval_confidence` and bypassed generation entirely in ~73ms; the unsafe-input test triggered a pre-retrieval keyword filter; the ambiguous cricket-in-America query landed right at 0.748, just under your 0.75 cutoff — that's a real, working threshold, not a hardcoded demo.
+- **You went beyond the brief in a good way**: TTS output (Sarvam `bulbul:v3`) turns this into a full voice-*to*-voice loop, not just voice-to-text-answer. That's a strong differentiator worth calling out explicitly to judges since it wasn't required.
+- **Real engineering debugging is documented**: Qdrant/Windows `portalocker` issues, PyArrow schema unpacking for the MSMARCO parquet files, client-side WebM→WAV conversion for Sarvam compatibility. These are exactly the "we hit real problems and fixed them" details that separate a genuine build from a copy-pasted tutorial — put these in your demo video narration.
+- **Hinglish/code-switched query handling actually works** (Test 8), which validates your Indic-focus positioning is real, not just marketing copy in the README.
+
+### The one issue you need to fix before submitting
+
+**Your README's latency table doesn't match your own REPORT.md, and the mismatch works against you.**
+
+| Source | P50 | P70 | P100 |
+|---|---|---|---|
+| README.md | ~120ms | ~145ms | ~180ms |
+| REPORT.md (actual measured) | ~73ms | ~77ms | ~398ms |
+
+The README numbers appear to be the *placeholder* values from the original guide template, never overwritten with your real benchmark output. Two problems:
+1. It's factually wrong versus your own report.
+2. It's actually **selling your project short in one place and overselling it in another** — P50/P70 in reality are *better* than what the README claims (73ms vs 120ms — great!), but P100 is *worse* (398ms vs 180ms — because full generation+TTS on a refusal-miss case blows past the 200ms target).
+
+Since the brief's 200ms target is specifically about "chunking + vector DB retrieval + everything through to final output," and your own report shows full Gen+TTS runs average ~398ms, you have two honest options — pick one and make the README match REPORT.md exactly:
+
+- **Option A**: Report retrieval-only or text-answer-only latency (pre-TTS) against the 200ms target, and present TTS as a bonus feature with its own separate latency line. This is defensible since the brief's own pipeline diagram ends at "generation," not "spoken audio."
+- **Option B**: Own the 398ms number honestly, and reframe it as "text answer generation is well under 200ms; full spoken-response including TTS synthesis (a feature beyond the brief) adds ~320ms." Judges respect honest numbers with a clear breakdown far more than a mismatched claim they can catch by reading two files.
+
+Either way — fix this before the form is submitted, since there's no resubmission.
+
+### Smaller gaps worth a quick look
+
+- **`PROJECT.md` is still the unfilled template** — it has literal `[Team name]`, `[N]`, `[Project Name]` placeholders sitting in your public repo. Either delete it (README + REPORT.md already cover this content better) or fill it in — a judge opening it mid-review and seeing brackets looks unfinished.
+- **README doesn't mention TTS at all** despite it being a real, tested feature (Sarvam `bulbul:v3`) — this is free credit you're not claiming. Add a line to Architecture and Tech Stack.
+- **README doesn't mention hybrid/sparse retrieval or re-ranking** — worth confirming whether you actually implemented this optional piece from the guide; if yes, add it (it's one of the strongest "engineered, not naive" signals); if no, no action needed.
+- **No visible mention of the second and third chunking strategies actually being used at inference time** (vs. just implemented) — REPORT.md doesn't show which strategy served which test case's answer, which the original guide suggested logging for exactly this kind of scrutiny. If you have this logged, surface it in the demo video.
+
+### Bottom line
+This is a real, working, tested system with honest failure-mode coverage — the gap between claim and reality is narrower here than in most hackathon submissions. Fix the latency table before you submit; everything else is polish, not risk.

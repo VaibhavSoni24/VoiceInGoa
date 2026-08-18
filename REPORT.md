@@ -81,5 +81,6 @@ Latency measurements taken across 5 consecutive end-to-end RAG runs (Retrieval +
 ## Key Achievements & Fixes Implemented
 
 - **Fixed Qdrant Local State Issues**: Ensured Windows `portalocker` issues didn't interfere with database flushes. Fixed empty MSMARCO datasets loading due to PyArrow schemas by properly unpacking `passages.Translated_passages` from `fastparquet`.
-- **Latency Optimization**: Qdrant runs effectively with less than 25ms total lookup times on a limited dataset chunk.
+- **Latency Optimization**: Qdrant runs effectively with less than 25ms total lookup times on a limited dataset chunk. We intentionally skipped hybrid/sparse retrieval to ensure vector search operations resolve within our strict sub-50ms latency budget.
 - **Client-Side WAV conversion**: Enabled Sarvam AI REST API support by converting unsupported browser `.webM` payloads natively in `App.jsx`.
+- **Metadata-Enriched Passage Indexing**: Because MS MARCO-XI consists of pre-translated, short passages, we bypassed naive text chunking. Instead, we applied full passage-level indexing enriched with specific dataset metrics to preserve native semantic meaning.

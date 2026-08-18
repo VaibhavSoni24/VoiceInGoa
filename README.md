@@ -6,10 +6,10 @@
 Most RAG demos stop at "chunk, embed, retrieve, generate." We treated retrieval quality, latency, and answer safety as first-class engineering problems, not afterthoughts. VoiceInGoa is a full voice-to-answer pipeline that transcribes spoken Indic-language queries, retrieves grounded context from MS MARCO-XI using complementary chunking/retrieval strategies, and generates cited, guardrailed answers — all orchestrated through a structured pipeline with retries and error recovery, benchmarked end-to-end to hit the sub-200ms target.
 
 ## Architecture
-Voice input → Sarvam STT → query preprocessing → retrieval (multilingual-e5-small + Qdrant) → grounding-confidence check → InceptionAPI (mercury-2) generation with structured, cited output → hallucination/grounding guardrail → final spoken-question-answered response with source citations.
+Voice input → Sarvam STT → query preprocessing → pure dense retrieval (multilingual-e5-small + Qdrant) → grounding-confidence check → InceptionAPI (mercury-2) generation with structured, cited output → hallucination/guardrail check → final text and spoken-voice response via Sarvam TTS (bulbul:v3).
 
 ## What makes the retrieval "engineered, not naive"
-We implemented three chunking strategies — fixed-size overlap, sentence-boundary semantic chunking, and metadata-enriched passage indexing. MS MARCO-XI's short, translated passages meant naive fixed chunking lost cross-passage context that metadata linking recovered.
+While MS MARCO-XI provides optimally sized, translated passages that negate the need for arbitrary token-chunking, we engineered a metadata-enriched passage indexing strategy instead. We intentionally chose pure dense retrieval over hybrid/sparse retrieval to guarantee sub-50ms vector search latency for the live demo.
 
 ## Latency engineering
 To hit the sub-200ms target we keep the embedding model warm in-process, use an in-memory/local Qdrant vector index, cap top-k at 3, and use InceptionAPI's fast `mercury-2` model for generation.

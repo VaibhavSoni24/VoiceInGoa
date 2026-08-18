@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Mic, MicOff, Play, Send, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { startTour } from './tour';
+import logo from './assets/logo.png';
 import './index.css';
 
 // WAV Encoder Utilities
@@ -118,8 +119,8 @@ function App() {
       
       const formData = new FormData();
       formData.append('file', wavBlob, 'recording.wav');
-      // Assuming backend is running on localhost:8000
-      const response = await fetch('http://localhost:8000/api/ask-voice', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiUrl}/api/ask-voice`, {
         method: 'POST',
         body: formData,
       });
@@ -183,9 +184,10 @@ function App() {
       <div className="container mx-auto px-4 py-12 max-w-4xl relative z-10">
         
         {/* Header */}
-        <header className="text-center mb-16">
+        <header className="text-center mb-16 flex flex-col items-center">
+          <img src={logo} alt="VoiceInGoa Logo" className="w-24 h-24 mb-4 object-contain animate-fade-in-up" />
           <div className="inline-block px-3 py-1 bg-[#ff007f] text-white text-xs font-bold tracking-widest rounded-full mb-4 uppercase">Task #2</div>
-          <h1 className="text-5xl font-extrabold text-[#0e6e3c] mb-4 tracking-tight">Voice-Enabled RAG Model</h1>
+          <h1 className="text-5xl font-extrabold text-[#0e6e3c] mb-4 tracking-tight">VoiceInGoa</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Speak a question, get a grounded answer. Sub-200ms latency with engineered chunking and guardrails.
           </p>

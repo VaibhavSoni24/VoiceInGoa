@@ -190,21 +190,21 @@ Keep it minimal but working reliably live:
 
 ---
 
-## [Project Name] — Voice-Enabled RAG for Indic Question Answering
+## VoiceInGoa — Voice-Enabled RAG for Indic Question Answering
 
 **One-line pitch:** A sub-200ms, guardrailed voice-to-answer retrieval system built on the MS MARCO-XI Indic dataset — speak a question, get a grounded, cited answer, or a clear refusal when the system isn't confident.
 
 ### Problem & Approach
-Most RAG demos stop at "chunk, embed, retrieve, generate." We treated retrieval quality, latency, and answer safety as first-class engineering problems, not afterthoughts. [Team name] built a full voice-to-answer pipeline that transcribes spoken Indic-language queries, retrieves grounded context from MS MARCO-XI using [N] complementary chunking/retrieval strategies, and generates cited, guardrailed answers — all orchestrated through a structured pipeline with retries and error recovery, benchmarked end-to-end at P50 [X]ms / P70 [X]ms / P100 [X]ms.
+Most RAG demos stop at "chunk, embed, retrieve, generate." We treated retrieval quality, latency, and answer safety as first-class engineering problems, not afterthoughts. VoiceInGoa built a full voice-to-answer pipeline that transcribes spoken Indic-language queries, retrieves grounded context from MS MARCO-XI using metadata-enriched indexing, and generates cited, guardrailed answers — all orchestrated through a structured pipeline with retries and error recovery, benchmarked end-to-end at P50 73ms / P70 77ms / P100 398ms.
 
 ### Architecture
-Voice input → [Sarvam/ElevenLabs] STT → query preprocessing → hybrid retrieval ([dense embedding model] + [sparse/BM25], re-ranked via [method]) → grounding-confidence check → [LLM] generation with structured, cited output → hallucination/grounding guardrail → final spoken-question-answered response with source citations.
+Voice input → Sarvam STT → query preprocessing → dense retrieval (multilingual-e5-small + Qdrant) → grounding-confidence check → InceptionAPI (mercury-2) generation with structured, cited output → hallucination/grounding guardrail → final spoken-question-answered response via Sarvam TTS with source citations.
 
 ### What makes the retrieval "engineered, not naive"
-We implemented and A/B'd three chunking strategies — fixed-size overlap, sentence-boundary semantic chunking, and metadata-enriched passage indexing — and combined dense + sparse retrieval with [re-ranking method], because [brief reasoning, e.g. "MS MARCO-XI's short, translated passages meant naive fixed chunking lost cross-passage context that metadata linking recovered"].
+While MS MARCO-XI provides optimally sized, translated passages that negate the need for arbitrary token-chunking, we engineered a metadata-enriched passage indexing strategy instead. We intentionally chose pure dense retrieval over hybrid/sparse retrieval to guarantee sub-50ms vector search latency for the live demo.
 
 ### Latency engineering
-To hit the sub-200ms target we [kept the embedding model warm in-process / used an in-memory vector index / capped top-k at N / parallelized dense+sparse search / used a fast small LLM], measured across [N] real queries sampled from the MARCO query set.
+To hit the sub-200ms target we keep the embedding model warm in-process, use an in-memory/local Qdrant vector index, cap top-k at 3, and use InceptionAPI's fast `mercury-2` model for generation, measured across 5 real queries sampled from the MARCO query set.
 
 | Metric | Latency |
 |---|---|
@@ -213,19 +213,19 @@ To hit the sub-200ms target we [kept the embedding model warm in-process / used 
 | P100 | 398 ms |
 
 ### Harness & reliability
-The pipeline runs through a typed orchestrator (`[module/class name]`) with structured request/response schemas at every stage, retry-with-backoff on all external calls (STT, embedding, LLM, vector DB), hard timeouts, and explicit fallback paths (e.g. [re-ranker timeout → fall back to raw vector order]) — so a single slow or failing dependency degrades gracefully instead of crashing the request.
+The pipeline runs through a typed orchestrator (`backend/pipeline.py`) with structured request/response schemas at every stage, retry-with-backoff on all external calls (STT, embedding, LLM, vector DB) using `tenacity`, hard timeouts, and explicit fallback paths — so a single slow or failing dependency degrades gracefully instead of crashing the request.
 
 ### Guardrails
-The system refuses to answer when retrieval confidence falls below [threshold], filters off-topic and unsafe queries before they reach generation, and checks generated answers for grounding against the retrieved passages before returning them — surfaced transparently in the UI as [cited sources / confidence score / refusal message].
+The system refuses to answer when retrieval confidence falls below `0.75`, filters off-topic and unsafe queries before they reach generation, and checks generated answers for grounding against the retrieved passages before returning them — surfaced transparently in the UI as a `Guardrail Triggered` refusal message.
 
 ### Tech stack
-STT: [Sarvam/ElevenLabs] · Embeddings: [model] · Vector DB: [Qdrant/Chroma/etc.] · LLM: [model] · Backend: [FastAPI] · Frontend: [stack] · Deployment: [platform]
+STT/TTS: Sarvam AI · Embeddings: multilingual-e5-small · Vector DB: Qdrant · LLM: InceptionAPI (mercury-2) · Backend: FastAPI · Frontend: React + Tailwind · Deployment: Vercel / Railway
 
 ### Links
-- GitHub: [repo link]
-- Live demo: [live link]
-- Team/process video: [link]
-- Demo video: [link]
+- GitHub: https://github.com/VaibhavSoni24/VoiceInGoa
+- Live demo: [Will update post-deployment]
+- Team/process video: [To be added by team]
+- Demo video: [To be added by team]
 
 #RAGInGoa
 
