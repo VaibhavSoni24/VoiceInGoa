@@ -76,12 +76,20 @@ def call_tts(text: str) -> str:
             model="bulbul:v3",
             text=text,
             language_code="hi-IN", # or en-IN depending on text, but let's use hi-IN
-            speaker="meera",
+            speaker="shubh",
+            output_audio_codec="wav",
         )
-        if hasattr(response, 'audios') and response.audios:
+        
+        # Depending on SDK version, response could be a pydantic model, a dict, raw bytes, or base64 string
+        if isinstance(response, bytes):
+            return base64.b64encode(response).decode('utf-8')
+        elif isinstance(response, str):
+            return response
+        elif hasattr(response, 'audios') and response.audios:
             return response.audios[0]
         elif isinstance(response, dict) and "audios" in response and response["audios"]:
             return response["audios"][0]
+            
     except Exception as e:
         print(f"TTS Error: {e}")
     return None
