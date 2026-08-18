@@ -227,7 +227,7 @@ STT/TTS: Sarvam AI · Embeddings: multilingual-e5-small · Vector DB: Qdrant · 
 - Team/process video: [To be added by team]
 - Demo video: [To be added by team]
 
-> **Note on Deployment:** [Deployment details to be updated]
+> **Note on Deployment:** The backend is deployed on **Microsoft Azure (App Service for Containers)** utilizing a B2 compute tier to efficiently host the full 100k+ MS MARCO-XI dataset in-memory with Qdrant and PyTorch.
 
 #RAGInGoa
 

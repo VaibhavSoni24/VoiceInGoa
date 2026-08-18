@@ -59,8 +59,16 @@ venv\Scripts\activate
 python benchmarks.py
 ```
 
-## 5. Usage
-1. Open the frontend in your browser (usually `http://localhost:5173`).
+## 5. Deployment (Microsoft Azure)
+The backend is Dockerized and ready for **Azure App Service (Web App for Containers)**.
+1. Install the Azure CLI and login: `az login`.
+2. Create an App Service Plan (ensure you select at least a **B2** tier to accommodate the 1.5GB RAM requirement for PyTorch & Qdrant).
+3. Push the `backend` folder directly to Azure App Service via the Azure Portal or using the `az webapp up` command.
+4. Ensure you add `INCEPTION_API_KEY` and `SARVAM_API_KEY` to the App Service Environment Variables.
+5. In your frontend, update Vercel with the Azure App Service URL.
+
+## 6. Usage
+1. Open the live frontend.
 2. Complete the onboarding tour.
 3. Click the Microphone icon, speak your question clearly, and click again to stop.
 4. The system will transcribe, retrieve, and generate the answer in under 200ms!

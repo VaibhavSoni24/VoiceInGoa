@@ -119,7 +119,8 @@ function App() {
       
       const formData = new FormData();
       formData.append('file', wavBlob, 'recording.wav');
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const apiUrl = import.meta.env.VITE_API_URL;
+      if (!apiUrl) throw new Error("VITE_API_URL is not set. Please configure your Azure endpoint.");
       const response = await fetch(`${apiUrl}/api/ask-voice`, {
         method: 'POST',
         body: formData,
