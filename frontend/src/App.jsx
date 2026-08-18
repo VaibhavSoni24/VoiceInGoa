@@ -142,6 +142,13 @@ function App() {
           generation_ms: data.latency_ms?.generation || 0,
           total_rag_ms: data.latency_ms?.total || 0
         });
+        
+        // Autoplay TTS
+        if (data.audio_base64) {
+          const audio = new Audio(`data:audio/wav;base64,${data.audio_base64}`);
+          audio.play().catch(e => console.error("Audio playback failed:", e));
+        }
+        
       } else if (data.status === 'refused') {
         setTranscript(data.transcribed_query);
         setAnswer({

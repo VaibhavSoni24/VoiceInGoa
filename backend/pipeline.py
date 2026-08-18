@@ -63,6 +63,30 @@ def call_llm(prompt: str) -> str:
         
     return response.json()["choices"][0]["message"]["content"]
 
+import base64
+@retry(stop=stop_after_attempt(2), wait=wait_exponential(multiplier=0.5, min=0.5, max=2))
+def call_tts(text: str) -> str:
+    if not SARVAM_API_KEY or SARVAM_API_KEY == "your_sarvam_api_key_here":
+        return None
+        
+    client = SarvamAI(api_subscription_key=SARVAM_API_KEY)
+    
+    try:
+        response = client.text_to_speech.convert(
+            model="bulbul:v3",
+            text=text,
+            language_code="hi-IN", # or en-IN depending on text, but let's use hi-IN
+            speaker="meera",
+        )
+        if hasattr(response, 'audios') and response.audios:
+            return response.audios[0]
+        elif isinstance(response, dict) and "audios" in response and response["audios"]:
+            return response["audios"][0]
+    except Exception as e:
+        print(f"TTS Error: {e}")
+    return None
+
+
 def run_rag_pipeline(query: str):
     start_time = time.time()
     
@@ -118,10 +142,16 @@ def run_rag_pipeline(query: str):
     
     # 5. Guardrail Check: Post-generation hallucination catch
     if not Guardrails.post_generation_check(answer_text, context_str):
+        # 6. Generation of TTS Audio for partial
+        audio_base64 = None
+        if answer_text and not "Failed to generate" in answer_text:
+            audio_base64 = call_tts(answer_text)
+            
         return {
             "status": "answered_partial",
             "transcribed_query": query,
             "answer": answer_text,
+            "audio_base64": audio_base64,
             "confidence_score": top_score,
             "guardrail_triggered": "unsupported_claim_removed",
             "note": "Additional reasoning was removed because it was not supported by retrieved context.",
@@ -133,12 +163,18 @@ def run_rag_pipeline(query: str):
             }
         }
     
+    # 6. Generation of TTS Audio
+    audio_base64 = None
+    if answer_text and not "Failed to generate" in answer_text:
+        audio_base64 = call_tts(answer_text)
+        
     total_rag_ms = int((time.time() - start_time) * 1000)
     
     return {
         "status": "answered",
         "transcribed_query": query,
         "answer": answer_text,
+        "audio_base64": audio_base64,
         "confidence_score": top_score,
         "citations": citations,
         "guardrail_triggered": None,

@@ -28,6 +28,14 @@ def download_and_prep_dataset(output_dir="data"):
         print(f"Loaded {len(df)} passages. Saving to {corpus_file}...")
         
         with open(corpus_file, "w", encoding="utf-8") as f:
+            # Prepend Golden Records
+            if os.path.exists("golden_records.json"):
+                with open("golden_records.json", "r", encoding="utf-8") as gf:
+                    golden = json.load(gf)
+                    for i, record in enumerate(golden):
+                        f.write(json.dumps({"_id": f"golden_{i}", "text": record}, ensure_ascii=False) + "\n")
+            
+            count = 0
             for _, row in df.iterrows():
                 query_id = str(row.get("query_id", row.name))
                 passages = row.get("passages.Translated_passages", [])
@@ -42,8 +50,13 @@ def download_and_prep_dataset(output_dir="data"):
                         "text": str(p),
                     }
                     f.write(json.dumps(item, ensure_ascii=False) + "\n")
+                    count += 1
+                    if count >= 10000:
+                        break
+                if count >= 10000:
+                    break
                 
-        print("Dataset preparation complete.")
+        print(f"Dataset preparation complete. Wrote {count} passages + golden records.")
         
     except Exception as e:
         print(f"Error downloading dataset: {e}")

@@ -112,4 +112,4 @@ def retrieve(query: str, top_k=5):
     return results, retrieval_ms
 
 if __name__ == "__main__":
-    index_dataset(limit=5000) 
+    index_dataset(limit=None) 
