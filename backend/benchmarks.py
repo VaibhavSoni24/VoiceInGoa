@@ -17,7 +17,7 @@ def run_benchmarks():
     for i, query in enumerate(test_queries):
         print(f"Query {i+1}: {query}")
         result = run_rag_pipeline(query)
-        rag_ms = result["metrics"]["total_rag_ms"]
+        rag_ms = result["latency_ms"]["total"]
         print(f" -> Latency: {rag_ms} ms")
         latencies.append(rag_ms)
         

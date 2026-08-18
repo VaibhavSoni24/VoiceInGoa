@@ -39,31 +39,36 @@ async def ask_voice(file: UploadFile = File(...)):
         try:
             transcript = call_stt(temp_audio.name)
         except Exception as e:
-            return {"status": "error", "message": f"STT failed: {str(e)}"}
+            if "RetryError" in str(type(e).__name__):
+                return {
+                    "status": "error",
+                    "error_type": "upstream_service_failure",
+                    "service": "sarvam_stt",
+                    "retries_attempted": 3,
+                    "message": "Voice transcription service is temporarily unavailable. Please try again.",
+                    "latency_ms": {"total": int((time.time() - start_time) * 1000)}
+                }
+            return {"status": "error", "error_type": "unknown_stt_failure", "message": f"STT failed: {str(e)}"}
+            
         stt_ms = int((time.time() - stt_start) * 1000)
         
         # If transcript is empty
         if not transcript.strip():
-            return {"status": "error", "message": "Could not understand audio."}
+            return {
+                "status": "error", 
+                "error_type": "empty_transcription",
+                "message": "I didn't catch that — please try speaking your question again."
+            }
             
         # 3. RAG Pipeline
         rag_result = run_rag_pipeline(transcript)
         
         # 4. Construct Response
-        response = {
-            "status": "success",
-            "transcript": transcript,
-            "answer": {
-                "refused": rag_result["refused"],
-                "content": rag_result["content"],
-                "reason": rag_result.get("reason"),
-                "citations": rag_result.get("citations", [])
-            },
-            "metrics": rag_result["metrics"]
-        }
-        response["metrics"]["stt_ms"] = stt_ms
-        
-        return response
+        if "latency_ms" in rag_result:
+            rag_result["latency_ms"]["stt"] = stt_ms
+            rag_result["latency_ms"]["total"] += stt_ms
+            
+        return rag_result
         
     finally:
         # Cleanup

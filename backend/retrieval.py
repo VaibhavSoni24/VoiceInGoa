@@ -52,6 +52,8 @@ def index_dataset(corpus_file="data/corpus.json", limit=None):
     points = []
     count = 0
     
+    global_id_counter = 1
+    
     with open(corpus_file, "r", encoding="utf-8") as f:
         for line in f:
             if not line.strip(): continue
@@ -59,20 +61,21 @@ def index_dataset(corpus_file="data/corpus.json", limit=None):
             
             chunks = apply_chunking_strategies(passage)
             for chunk in chunks:
-                # E5 models recommend prefixing "query: " or "passage: "
-                # We prefix with "passage: "
                 vector = get_embedding("passage: " + chunk["metadata_rich_text"])
                 
                 points.append(PointStruct(
-                    id=abs(hash(chunk["id"])) % (10 ** 15), # Convert string ID to positive int for Qdrant
+                    id=global_id_counter,
                     vector=vector,
                     payload=chunk
                 ))
+                global_id_counter += 1
                 
             count += 1
             if count % 100 == 0:
                 print(f"Processed {count} passages...")
-                client.upsert(collection_name=COLLECTION_NAME, points=points)
+                res = client.upsert(collection_name=COLLECTION_NAME, points=points)
+                print("Upsert result:", res.status)
+                print("Points count:", client.get_collection(COLLECTION_NAME).points_count)
                 points = []
                 
             if limit and count >= limit:
@@ -109,6 +112,4 @@ def retrieve(query: str, top_k=5):
     return results, retrieval_ms
 
 if __name__ == "__main__":
-    # If run directly, perform indexing on a small limit for quick setup
-    # Pass limit=None to index the full downloaded dataset
     index_dataset(limit=5000) 

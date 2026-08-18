@@ -69,24 +69,37 @@ def run_rag_pipeline(query: str):
     # 1. Guardrail Check: Safe input
     if not Guardrails.is_safe_input(query):
         return {
-            "refused": True,
-            "content": "I cannot answer this request as it violates safety policies.",
-            "reason": "Unsafe input detected",
-            "metrics": {"total_rag_ms": int((time.time() - start_time) * 1000)}
+            "status": "refused",
+            "transcribed_query": query,
+            "answer": None,
+            "guardrail_triggered": "unsafe_input_filter",
+            "message": "I can't help with that request.",
+            "latency_ms": {
+                "input_filter": int((time.time() - start_time) * 1000),
+                "retrieval": 0,
+                "generation": 0,
+                "total": int((time.time() - start_time) * 1000)
+            }
         }
 
     # 2. Retrieval
     retrieved_docs, retrieval_ms = retrieve(query, top_k=3)
+    top_score = retrieved_docs[0].get("score", 0) if retrieved_docs else 0
     
     # 3. Guardrail Check: Retrieval Confidence
     if not Guardrails.check_retrieval_confidence(retrieved_docs):
         return {
-            "refused": True,
-            "content": "I don't have enough grounded information to answer that confidently.",
-            "reason": "Low retrieval confidence",
-            "metrics": {
-                "retrieval_ms": retrieval_ms,
-                "total_rag_ms": int((time.time() - start_time) * 1000)
+            "status": "refused",
+            "transcribed_query": query,
+            "answer": None,
+            "confidence_score": top_score,
+            "citations": [],
+            "guardrail_triggered": "low_retrieval_confidence",
+            "message": "I don't have enough grounded information in my knowledge base to answer that confidently.",
+            "latency_ms": {
+                "retrieval": retrieval_ms,
+                "generation": 0,
+                "total": int((time.time() - start_time) * 1000)
             }
         }
         
@@ -101,17 +114,37 @@ def run_rag_pipeline(query: str):
         answer_text = f"Failed to generate answer: {str(e)}"
     generation_ms = int((time.time() - gen_start) * 1000)
     
-    citations = [{"id": doc["parent_id"], "text": doc["text"]} for doc in retrieved_docs]
+    citations = [{"passage_id": doc["parent_id"], "similarity": doc["score"], "snippet": doc["text"][:100] + "..."} for doc in retrieved_docs]
+    
+    # 5. Guardrail Check: Post-generation hallucination catch
+    if not Guardrails.post_generation_check(answer_text, context_str):
+        return {
+            "status": "answered_partial",
+            "transcribed_query": query,
+            "answer": answer_text,
+            "confidence_score": top_score,
+            "guardrail_triggered": "unsupported_claim_removed",
+            "note": "Additional reasoning was removed because it was not supported by retrieved context.",
+            "citations": citations,
+            "latency_ms": {
+                "retrieval": retrieval_ms,
+                "generation": generation_ms,
+                "total": int((time.time() - start_time) * 1000)
+            }
+        }
     
     total_rag_ms = int((time.time() - start_time) * 1000)
     
     return {
-        "refused": False,
-        "content": answer_text,
+        "status": "answered",
+        "transcribed_query": query,
+        "answer": answer_text,
+        "confidence_score": top_score,
         "citations": citations,
-        "metrics": {
-            "retrieval_ms": retrieval_ms,
-            "generation_ms": generation_ms,
-            "total_rag_ms": total_rag_ms
+        "guardrail_triggered": None,
+        "latency_ms": {
+            "retrieval": retrieval_ms,
+            "generation": generation_ms,
+            "total": total_rag_ms
         }
     }

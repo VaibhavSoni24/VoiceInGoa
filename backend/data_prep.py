@@ -27,15 +27,21 @@ def download_and_prep_dataset(output_dir="data"):
         
         print(f"Loaded {len(df)} passages. Saving to {corpus_file}...")
         
-        # Save corpus to JSONL for easier processing
         with open(corpus_file, "w", encoding="utf-8") as f:
             for _, row in df.iterrows():
-                # MS MARCO-XI parquet schema: _id, text, etc.
-                item = {
-                    "_id": str(row.get("_id", row.name)),
-                    "text": str(row.get("text", "")),
-                }
-                f.write(json.dumps(item, ensure_ascii=False) + "\n")
+                query_id = str(row.get("query_id", row.name))
+                passages = row.get("passages.Translated_passages", [])
+                
+                if passages is None or not isinstance(passages, (list, tuple)) and not hasattr(passages, "__iter__"):
+                    continue
+                    
+                for i, p in enumerate(passages):
+                    if not p: continue
+                    item = {
+                        "_id": f"{query_id}_{i}",
+                        "text": str(p),
+                    }
+                    f.write(json.dumps(item, ensure_ascii=False) + "\n")
                 
         print("Dataset preparation complete.")
         
