@@ -187,7 +187,7 @@ function App() {
         <header className="text-center mb-16 flex flex-col items-center">
           <img src={logo} alt="VoiceInGoa Logo" className="w-24 h-24 mb-4 object-contain animate-fade-in-up" />
           <div className="inline-block px-3 py-1 bg-[#ff007f] text-white text-xs font-bold tracking-widest rounded-full mb-4 uppercase">Task #2</div>
-          <h1 className="text-5xl font-extrabold text-[#0e6e3c] mb-4 tracking-tight">VoiceInGoa</h1>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-[#0e6e3c] mb-4 tracking-tight">VoiceInGoa</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Speak a question, get a grounded answer. Sub-200ms latency with engineered chunking and guardrails.
           </p>
@@ -251,7 +251,7 @@ function App() {
 
             {/* Transcript & Answer */}
             {transcript && (
-              <div id="results-container" className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 animate-fade-in-up">
+              <div id="results-container" className="bg-white rounded-3xl p-5 md:p-8 shadow-xl border border-gray-100 animate-fade-in-up">
                 
                 {/* Transcript */}
                 <div className="mb-8">
